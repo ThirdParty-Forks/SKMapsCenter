@@ -6,4 +6,6 @@ Scrolling while zooming can't be bypassed using the current Maps API.
 Therefore, I've used an UIView on top of Maps to intercept pinch gestures, which is then used to animate the correct region.
 All default gestures has been added to the UIView in order to simulate the exact same user experience as with Maps.
 
+Left (Demo), Right(Control used in context)
+
 ![alt tag](/Image.png)
