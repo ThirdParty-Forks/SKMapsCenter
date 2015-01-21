@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  SKMapsCenter.swift
 //  Demo
 //
 //  Created by Anders Klausen on 17/01/15.
@@ -9,11 +9,17 @@
 import Foundation
 import MapKit
 
-class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
+let outerCircleView_widthAndHeight: CGFloat = 172
+let innerCircleView_widthAndHeight: CGFloat = 20
+let greenColor: UIColor = UIColor(red: 36.0/255.0, green: 162.0/255.0, blue: 121.0/255.0, alpha: 1.0)
+
+class SKMapsCenter: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
     
-    @IBOutlet weak var mapView: MKMapView!
-    @IBOutlet weak var innerCircleView: UIView!
-    @IBOutlet weak var outerCircleView: UIView!
+    var mapView: MKMapView!
+    var layerView: UIView!
+    var outerCircleView: UIView!
+    var innerCircleView_animate: UIView!
+    var innerCircleView_static: UIView!
     
     var lastScale: CGFloat!
     
@@ -23,33 +29,68 @@ class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDe
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Initial properties for mapView
+        // Properties for mapView
+        mapView = MKMapView(frame: UIScreen.mainScreen().bounds)
         mapView.centerCoordinate = CLLocationCoordinate2DMake(37.364612, -122.034747)
         mapView.setRegion(MKCoordinateRegionMakeWithDistance(mapView.centerCoordinate, 5000, 5000), animated: true)
+        mapView.userInteractionEnabled = false
         mapView.delegate = self
+        
+        // Properties for layerView
+        layerView = UIView(frame: UIScreen.mainScreen().bounds)
+        layerView.backgroundColor = greenColor
+        layerView.alpha = 0.65
+        
+        // Properties for outerCircleView
+        outerCircleView = UIView(frame: CGRectMake((self.view.frame.size.width/2) - (outerCircleView_widthAndHeight/2), (self.view.frame.size.height/2) - (outerCircleView_widthAndHeight/2), outerCircleView_widthAndHeight, outerCircleView_widthAndHeight))
+        outerCircleView.backgroundColor = greenColor
+        outerCircleView.userInteractionEnabled = false
+        outerCircleView.alpha = 0.25
+        
+        // Properties for innerCircleView_animate
+        innerCircleView_animate = UIView(frame: CGRectMake((self.view.frame.size.width/2) - (innerCircleView_widthAndHeight/2), (self.view.frame.size.height/2) - (innerCircleView_widthAndHeight/2), innerCircleView_widthAndHeight, innerCircleView_widthAndHeight))
+        innerCircleView_animate.layer.cornerRadius = 10
+        innerCircleView_animate.backgroundColor = UIColor.whiteColor()
+        innerCircleView_animate.userInteractionEnabled = false
+        innerCircleView_animate.alpha = 0.2
+        
+        // Properties for innerCircleView_static
+        innerCircleView_static = UIView(frame: CGRectMake((self.view.frame.size.width/2) - (innerCircleView_widthAndHeight/2), (self.view.frame.size.height/2) - (innerCircleView_widthAndHeight/2), innerCircleView_widthAndHeight, innerCircleView_widthAndHeight))
+        innerCircleView_static.layer.cornerRadius = innerCircleView_animate.layer.cornerRadius
+        innerCircleView_static.backgroundColor = innerCircleView_animate.backgroundColor
+        innerCircleView_static.userInteractionEnabled = false
+        innerCircleView_static.opaque = true
         
         // Pinch gesture: Pinching while maintaining users center position on the mapView
         var pinchGestureRecognizer = UIPinchGestureRecognizer(target: self, action: "didReceivePinch:")
         pinchGestureRecognizer.delegate = self
-        mapView.addGestureRecognizer(pinchGestureRecognizer)
+        layerView.addGestureRecognizer(pinchGestureRecognizer)
         
         // One finger tap gesture: Used to zoom in on the mapView
         var tapOneGestureRecognizer = UITapGestureRecognizer(target: self, action: "didReceiveTapOne:")
         tapOneGestureRecognizer.delegate = self
         tapOneGestureRecognizer.numberOfTapsRequired = 2
-        mapView.addGestureRecognizer(tapOneGestureRecognizer)
+        layerView.addGestureRecognizer(tapOneGestureRecognizer)
         
         // Two finger tap gesture: Used to zoom out on the mapView
         var tapTwoGestureRecognizer = UITapGestureRecognizer(target: self, action: "didReceiveTapTwo:")
         tapTwoGestureRecognizer.delegate = self
         tapTwoGestureRecognizer.numberOfTouchesRequired = 2
-        mapView.addGestureRecognizer(tapTwoGestureRecognizer)
+        layerView.addGestureRecognizer(tapTwoGestureRecognizer)
+        
+        // Add subviews
+        self.view.addSubview(mapView)
+        self.view.addSubview(layerView)
+        self.view.addSubview(outerCircleView)
+        self.view.addSubview(innerCircleView_animate)
+        self.view.addSubview(innerCircleView_static)
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         
-        // Properties
+        // Extra properties for outerCircleView
+        outerCircleView.layer.borderWidth = 0.5
         outerCircleView.layer.borderColor = UIColor(red: 255.0/255.0, green: 255.0/255.0, blue: 255.0/255.0, alpha: 0.6).CGColor
     }
     
@@ -71,8 +112,8 @@ class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDe
         opacityAnimation.toValue = 0.0
         
         // Add animations to the innerCircleView
-        innerCircleView.layer.addAnimation(scaleAnimation, forKey: "scaleAnimation")
-        innerCircleView.layer.addAnimation(opacityAnimation, forKey: "opacityAnimation")
+        innerCircleView_animate.layer.addAnimation(scaleAnimation, forKey: "scaleAnimation")
+        innerCircleView_animate.layer.addAnimation(opacityAnimation, forKey: "opacityAnimation")
         
         // UI, outerCircleView
         self.outerCircleView.layer.cornerRadius = self.outerCircleView.frame.size.height / 2
