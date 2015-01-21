@@ -1,6 +1,5 @@
 # SKMapsCenter
 Maps (iOS, Swift) - maintain center while zooming.  
-Currently serves as inspiration rather than a finished product (on my TODO).
 
 Developed due to not being able to maintain the center position of a given location while zooming.  
 Scrolling while zooming can't be bypassed using the current Maps API.
